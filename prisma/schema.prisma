@@ -1,0 +1,198 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String       @id @default(uuid())
+  email           String       @unique
+  name            String?
+  display_picture String?
+  profile         Profile?
+  provider        String
+  attendances     Attendance[]
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@index([email], name: "email")
+}
+
+model Profile {
+  id                         String                            @id @default(uuid())
+  user                       User                              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId                     String                            @unique
+  phone_number               String
+  occupation                 String
+  birthday                   DateTime
+  marital_status             String
+  marriage_anniversary       DateTime?
+  is_church_member           Boolean                           @default(true)
+  dependents                 Dependent[]
+  church_join_date           DateTime?
+  church_centre              ChurchCentre?                     @relation(fields: [church_centre_id], references: [id])
+  church_centre_id           Int?
+  growth_track_completed     Boolean?
+  service_team               ProfileServiceTeams[]
+  home_cell                  HomeCell?                         @relation(fields: [home_cell_id], references: [id])
+  home_cell_id               Int?
+  colony                     Colony?                           @relation(fields: [colony_id], references: [id])
+  colony_id                  Int?
+  roles_and_responsibilities RolesAndResponsibilitiesProfile[]
+  is_tither                  Boolean?
+  is_partner                 Boolean?
+  partnered_arms             ChurchArmProfile[]
+  payment_interval           String?
+  createdAt                  DateTime                          @default(now())
+  updatedAt                  DateTime                          @updatedAt
+}
+
+model Dependent {
+  id                String                @id @default(uuid())
+  first_name        String
+  last_name         String
+  birthday          DateTime
+  allergies         String
+  emergency_contact String
+  parent_profile    Profile?              @relation(fields: [parent_profile_id], references: [id], onDelete: Cascade)
+  parent_profile_id String?
+  event_attendances AttendanceDependent[]
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+}
+
+model WalkIn {
+  id                      String   @id @default(uuid())
+  first_name              String
+  last_name               String
+  phone_number            String
+  email                   String?
+  is_church_member        Boolean  @default(true)
+  how_heard_about_program String
+  is_partner              Boolean
+  event                   Event    @relation(fields: [event_id], references: [id], onDelete: Cascade)
+  event_id                String
+  createdAt               DateTime @default(now())
+}
+
+model ServiceTeam {
+  id      Int                   @id @default(autoincrement())
+  name    String
+  members ProfileServiceTeams[]
+}
+
+model ProfileServiceTeams {
+  id              Int         @id @default(autoincrement())
+  service_team    ServiceTeam @relation(fields: [service_team_id], references: [id])
+  service_team_id Int
+  profile         Profile     @relation(fields: [profile_id], references: [id], onDelete: Cascade)
+  profile_id      String
+}
+
+model HomeCell {
+  id       Int       @id @default(autoincrement())
+  name     String    @unique
+  location String
+  members  Profile[]
+}
+
+model Colony {
+  id      Int       @id @default(autoincrement())
+  name    String
+  members Profile[]
+}
+
+model RolesAndResponsibilities {
+  id      Int                               @id @default(autoincrement())
+  name    String
+  members RolesAndResponsibilitiesProfile[]
+}
+
+model RolesAndResponsibilitiesProfile {
+  id                     Int                      @id @default(autoincrement())
+  role_responsibility    RolesAndResponsibilities @relation(fields: [role_responsibility_id], references: [id])
+  role_responsibility_id Int
+  profile                Profile                  @relation(fields: [profile_id], references: [id], onDelete: Cascade)
+  profile_id             String
+}
+
+model ChurchArm {
+  id       Int                @id @default(autoincrement())
+  name     String
+  partners ChurchArmProfile[]
+}
+
+model ChurchArmProfile {
+  id            Int       @id @default(autoincrement())
+  church_arm    ChurchArm @relation(fields: [church_arm_id], references: [id])
+  church_arm_id Int
+  profile       Profile   @relation(fields: [profile_id], references: [id], onDelete: Cascade)
+  profile_id    String
+}
+
+model ChurchCentre {
+  id      Int       @id @default(autoincrement())
+  name    String
+  members Profile[]
+}
+
+model Event {
+  id           String       @id @default(uuid())
+  name         String
+  tagline      String
+  banner_image String
+  start_date   DateTime
+  end_date     DateTime
+  attendances  Attendance[]
+  walk_ins     WalkIn[]
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+}
+
+model EventService {
+  id          Int                      @id @default(autoincrement())
+  name        String
+  attendances AttendanceEventService[]
+  createdAt   DateTime                 @default(now())
+}
+
+model Attendance {
+  id                Int                      @id @default(autoincrement())
+  event             Event                    @relation(fields: [event_id], references: [id], onDelete: Cascade)
+  event_id          String
+  user              User                     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_id           String
+  in_person         Boolean
+  services_required AttendanceEventService[]
+  children          AttendanceDependent[]
+  dates_attending   DateTime[]
+  checked_in        Boolean                  @default(false)
+  createdAt         DateTime                 @default(now())
+  updatedAt         DateTime                 @updatedAt
+}
+
+model AttendanceEventService {
+  attendance       Attendance   @relation(fields: [attendance_id], references: [id], onDelete: Cascade)
+  attendance_id    Int
+  event_service    EventService @relation(fields: [event_service_id], references: [id])
+  event_service_id Int
+  assignedAt       DateTime     @default(now())
+
+  @@id([attendance_id, event_service_id])
+}
+
+model AttendanceDependent {
+  attendance    Attendance @relation(fields: [attendance_id], references: [id], onDelete: Cascade)
+  attendance_id Int
+  dependent     Dependent  @relation(fields: [dependent_id], references: [id], onDelete: Cascade)
+  dependent_id  String
+  assignedAt    DateTime   @default(now())
+
+  @@id([attendance_id, dependent_id])
+}
