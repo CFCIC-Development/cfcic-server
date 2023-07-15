@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma-module/prisma.service';
 import { ChurchCenterCreationDto } from './church-center.types';
 
@@ -17,12 +17,37 @@ export class ChurchCenterService {
   }
 
   async createChurchCenters(data: ChurchCenterCreationDto) {
-    const churchCenters = await this.prismaService.churchCentre.createMany({
-      data: data.names,
+    try {
+      const churchCenters = await this.prismaService.churchCentre.createMany({
+        data: data.names,
+      });
+
+      if (churchCenters) {
+        return { message: 'Church Centers created successfully' };
+      }
+    } catch (error) {
+      if (error) {
+        console.log('Error message:', error.message);
+        if (error.code === 'P2002') {
+          console.log(
+            `A unique constraint error occurred: ${error.meta.target}`,
+          );
+          throw new ForbiddenException('Centers With Such Names Already Exist');
+        }
+      }
+      throw error;
+    }
+  }
+
+  async deleteChurchCenterById(centerId: number) {
+    await this.prismaService.churchCentre.delete({
+      where: {
+        id: centerId,
+      },
     });
 
-    if (churchCenters) {
-      return { message: 'Church Centers created successfully' };
-    }
+    return {
+      message: 'Center successfully deleted',
+    };
   }
 }

@@ -83,7 +83,7 @@ model WalkIn {
 
 model ServiceTeam {
   id      Int                   @id @default(autoincrement())
-  name    String
+  name    String                @unique
   members ProfileServiceTeams[]
 }
 
@@ -104,13 +104,13 @@ model HomeCell {
 
 model Colony {
   id      Int       @id @default(autoincrement())
-  name    String
+  name    String    @unique
   members Profile[]
 }
 
 model RolesAndResponsibilities {
   id      Int                               @id @default(autoincrement())
-  name    String
+  name    String                            @unique
   members RolesAndResponsibilitiesProfile[]
 }
 
@@ -124,7 +124,7 @@ model RolesAndResponsibilitiesProfile {
 
 model ChurchArm {
   id       Int                @id @default(autoincrement())
-  name     String
+  name     String             @unique
   partners ChurchArmProfile[]
 }
 
@@ -138,12 +138,12 @@ model ChurchArmProfile {
 
 model ChurchCentre {
   id      Int       @id @default(autoincrement())
-  name    String
+  name    String    @unique
   members Profile[]
 }
 
 model Event {
-  id           String       @id @default(uuid())
+  id           String         @id @default(uuid())
   name         String
   tagline      String
   banner_image String
@@ -151,12 +151,15 @@ model Event {
   end_date     DateTime
   attendances  Attendance[]
   walk_ins     WalkIn[]
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  EventService EventService[]
 }
 
 model EventService {
   id          Int                      @id @default(autoincrement())
+  event       Event?                    @relation(fields: [event_id], references: [id])
+  event_id    String?
   name        String
   attendances AttendanceEventService[]
   createdAt   DateTime                 @default(now())
