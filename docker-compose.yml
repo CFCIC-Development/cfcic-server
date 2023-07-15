@@ -2,6 +2,7 @@ version: '3.7'
 services:
   members_events_db:
     container_name: members_events_db
+    hostname: members_events_db
     profiles:
       - dev
     image: postgres
@@ -15,7 +16,7 @@ services:
       - members_events_data:/var/lib/postgresql/data
     tty: true
     ports:
-      - 5432:5432
+      - ${DB_PORT}:5432
 
   dev_server:
     container_name: dev_server

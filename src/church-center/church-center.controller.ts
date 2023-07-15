@@ -1,4 +1,14 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  ParseIntPipe,
+  Post,
+} from '@nestjs/common';
 import { ChurchCenterService } from './church-center.service';
 import { ChurchCenterCreationDto } from './church-center.types';
 import { ApiTags } from '@nestjs/swagger';
@@ -19,11 +29,13 @@ export class ChurchCenterController {
   }
 
   @Post()
-  async createChurchCenters(
-    @Body('names') saveChurchCentersDto: ChurchCenterCreationDto,
-  ) {
-    return await this.churchCenterService.createChurchCenters(
-      saveChurchCentersDto,
-    );
+  async createChurchCenters(@Body() data: ChurchCenterCreationDto) {
+    return await this.churchCenterService.createChurchCenters(data);
+  }
+
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete(':id')
+  deleteStoreById(@Param('id', ParseIntPipe) centerId: number) {
+    return this.churchCenterService.deleteChurchCenterById(centerId);
   }
 }
