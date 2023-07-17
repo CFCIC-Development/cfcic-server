@@ -23,7 +23,7 @@ jobs:
         run: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
 
       - name: Build Docker image
-        run: docker build -t $DOCKER_USERNAME/$IMAGE_NAME:$IMAGE_TAG .
+        run: docker build -t $DOCKER_USERNAME/$IMAGE_NAME:$IMAGE_TAG --target dev .
 
       - name: Push Docker image
         run: docker push $DOCKER_USERNAME/$IMAGE_NAME:$IMAGE_TAG
