@@ -22,7 +22,7 @@ export class ProfileController {
   constructor(private readonly profileService: ProfileService) {}
 
   @Get(':userId')
-  @UseGuards(AuthenticatedGuard)
+  @UseGuards(JwtGuard)
   async getProfile(@Param('userId') userId: string): Promise<any> {
     return await this.profileService.fetchUserProfileById({ id: userId });
   }

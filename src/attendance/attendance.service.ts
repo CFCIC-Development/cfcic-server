@@ -162,6 +162,9 @@ export class AttendanceService {
         event_id: data.event_id,
         user_id: data.user_id,
         in_person: data.in_person,
+        requires_feeding: data.requires_feeding,
+        requires_accomodation: data.requires_accomodation,
+        requires_transport: data.requires_transport,
         dates_attending: data.dates_attending,
         services_required: {
           createMany: {
