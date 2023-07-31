@@ -5,15 +5,20 @@ import {
   UseGuards,
   Redirect,
   Req,
+  Post,
+  Body,
+  HttpCode,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { FacebookAuthGuard } from './facebook.auth.guard';
 import { ConfigService } from '@nestjs/config';
 import { GoogleAuthGuard } from './google.auth.guard';
 import { AuthenticatedGuard } from './authenticated.guard';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
-
+import { AuthDto, AuthResponseDto } from './dto';
+import { JwtGuard } from './guard';
+import { EventResponseDto } from 'src/event/event.types';
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
@@ -66,12 +71,37 @@ export class AuthController {
   }
 
   @Get('/logout')
-  @UseGuards(AuthenticatedGuard)
+  @UseGuards(JwtGuard)
   async logout(@Req() req: any): Promise<any> {
     await req.session.destroy();
     return {
       statusCode: HttpStatus.OK,
       message: 'Logged out successfully',
     };
+  }
+
+  @ApiBody({ type: AuthDto })
+  @ApiResponse({
+    status: 201,
+    description:
+      'The user has been successfully logged in. Put the token in a header with the name as Authorization and its value as Bearer <access_token>',
+    type: AuthResponseDto,
+  })
+  @Post('/register')
+  signup(@Body() dto: AuthDto) {
+    return this.authService.signup(dto);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @ApiBody({ type: AuthDto })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description:
+      'The user has been successfully logged in. Put the token in a header with the name as Authorization and its value as Bearer <access_token>',
+    type: AuthResponseDto,
+  })
+  @Post('/login')
+  signin(@Body() dto: AuthDto) {
+    return this.authService.signin(dto);
   }
 }

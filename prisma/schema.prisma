@@ -13,10 +13,11 @@ datasource db {
 model User {
   id              String       @id @default(uuid())
   email           String       @unique
+  password        String?
   name            String?
   display_picture String?
   profile         Profile?
-  provider        String
+  provider        String?
   attendances     Attendance[]
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
@@ -158,7 +159,7 @@ model Event {
 
 model EventService {
   id          Int                      @id @default(autoincrement())
-  event       Event?                    @relation(fields: [event_id], references: [id])
+  event       Event?                   @relation(fields: [event_id], references: [id])
   event_id    String?
   name        String
   attendances AttendanceEventService[]
@@ -166,18 +167,21 @@ model EventService {
 }
 
 model Attendance {
-  id                Int                      @id @default(autoincrement())
-  event             Event                    @relation(fields: [event_id], references: [id], onDelete: Cascade)
-  event_id          String
-  user              User                     @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  user_id           String
-  in_person         Boolean
-  services_required AttendanceEventService[]
-  children          AttendanceDependent[]
-  dates_attending   DateTime[]
-  checked_in        Boolean                  @default(false)
-  createdAt         DateTime                 @default(now())
-  updatedAt         DateTime                 @updatedAt
+  id                    Int                      @id @default(autoincrement())
+  event                 Event                    @relation(fields: [event_id], references: [id], onDelete: Cascade)
+  event_id              String
+  user                  User                     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_id               String
+  in_person             Boolean                  @default(false)
+  requires_feeding      Boolean                  @default(false)
+  requires_accomodation Boolean                  @default(false)
+  requires_transport    Boolean                  @default(false)
+  services_required     AttendanceEventService[]
+  children              AttendanceDependent[]
+  dates_attending       DateTime[]
+  checked_in            Boolean                  @default(false)
+  createdAt             DateTime                 @default(now())
+  updatedAt             DateTime                 @updatedAt
 }
 
 model AttendanceEventService {

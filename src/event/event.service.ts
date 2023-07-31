@@ -1,10 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma-module/prisma.service';
-import {
-  EventCreationDto,
-  EventUpdateAfterImgUploadDto,
-  EventUpdateDto,
-} from './event.types';
+import { EventCreationDto, EventUpdateDto } from './event.types';
 import { AmazonS3Service } from 'src/amazon-s3/amazon-s3.service';
 import { ConfigService } from '@nestjs/config';
 
@@ -17,20 +13,9 @@ export class EventService {
   ) {}
 
   async createEvent(data: EventCreationDto): Promise<any> {
-    const fileUploaded = await this.s3Service.uploadFile(
-      data.banner_image.buffer,
-      data.banner_image.mimetype,
-      this.configService.get<string>('BANNER_IMAGES_FOLDER'),
-    );
-
-    const bannerImagePath =
-      this.configService.get<string>('BANNER_IMAGES_PATH_PREFIX') +
-      fileUploaded;
-
     const event = await this.prismaService.event.create({
       data: {
         ...data,
-        banner_image: bannerImagePath,
       },
     });
     return event;
@@ -51,31 +36,24 @@ export class EventService {
   }
 
   async updateEventById(id: string, data: EventUpdateDto): Promise<any> {
-    let bannerImagePath: string;
-    let updateData: unknown = data as EventUpdateDto;
-
-    if (data.banner_image) {
-      const fileUploaded = await this.s3Service.uploadFile(
-        data.banner_image.buffer,
-        data.banner_image.mimetype,
-        this.configService.get<string>('BANNER_IMAGES_FOLDER'),
-      );
-
-      bannerImagePath =
-        this.configService.get<string>('BANNER_IMAGES_PATH_PREFIX') +
-        fileUploaded;
-      updateData = {
-        ...data,
-        banner_image: bannerImagePath,
-      } as EventUpdateAfterImgUploadDto;
-    }
-
     const event = await this.prismaService.event.update({
       where: {
         id,
       },
-      data: updateData,
+      data,
     });
     return event;
+  }
+
+  async deleteEventById(eventId: string) {
+    await this.prismaService.event.delete({
+      where: {
+        id: eventId,
+      },
+    });
+
+    return {
+      message: 'Successfully deleted Event',
+    };
   }
 }

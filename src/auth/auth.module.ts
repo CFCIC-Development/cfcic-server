@@ -8,12 +8,15 @@ import { AuthenticatedGuard } from './authenticated.guard';
 import { PrismaModule } from 'src/prisma-module/prisma-module.module';
 import { ConfigModule } from '@nestjs/config';
 import { AuthService } from './auth.service';
+import { JwtStrategy } from './strategy';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
     PassportModule.register({ session: true }),
     PrismaModule,
     ConfigModule,
+    JwtModule.register({}),
   ],
   providers: [
     FacebookStrategy,
@@ -21,6 +24,7 @@ import { AuthService } from './auth.service';
     SessionSerializer,
     AuthenticatedGuard,
     AuthService,
+    JwtStrategy,
   ],
   controllers: [AuthController],
   exports: [FacebookStrategy, GoogleStrategy, AuthenticatedGuard],

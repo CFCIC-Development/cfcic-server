@@ -1,117 +1,88 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  HttpCode,
   HttpStatus,
   Param,
-  ParseFilePipeBuilder,
-  Patch,
   Post,
-  UploadedFile,
+  Put,
   UseGuards,
-  UseInterceptors,
 } from '@nestjs/common';
 import { EventService } from './event.service';
-import { EventCreationDto, EventUpdateDto } from './event.types';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { AuthenticatedGuard } from 'src/auth/authenticated.guard';
-import { ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import {
+  EventCreationDto,
+  EventResponseDto,
+  EventUpdateDto,
+} from './event.types';
+import { ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { JwtGuard } from 'src/auth/guard';
 
 @ApiTags('Event')
 @Controller('event')
 export class EventController {
   constructor(private readonly eventService: EventService) {}
 
+  @ApiResponse({
+    status: 200,
+    description: 'The events have been successfully fetched.',
+    type: EventResponseDto,
+    isArray: true, // Set this to true to indicate that the response is an array
+  })
   @Get()
   async getAllEvents() {
     const events = await this.eventService.getAllEvents();
     return events;
   }
 
+  @ApiResponse({
+    status: 200,
+    description: 'The event has been successfully fetched.',
+    type: EventResponseDto,
+  })
   @Get(':id')
   async getEventById(@Param('id') id: string) {
     const event = await this.eventService.getEventById(id);
     return event;
   }
 
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        name: { type: 'string' },
-        tagline: { type: 'string' },
-        banner_image: { type: 'string', format: 'binary' },
-        start_date: { type: 'string', format: 'date-time' },
-        end_date: { type: 'string', format: 'date-time' },
-      },
-    },
+  @ApiBody({ type: EventCreationDto })
+  @ApiResponse({
+    status: 201,
+    description: 'The event has been successfully created.',
+    type: EventResponseDto,
   })
-  @ApiConsumes('multipart/form-data')
   @Post()
-  @UseGuards(AuthenticatedGuard)
-  @UseInterceptors(FileInterceptor('banner_image'))
-  async createEvent(
-    @Body() data: EventCreationDto,
-    @UploadedFile(
-      new ParseFilePipeBuilder()
-        .addFileTypeValidator({
-          fileType: /(jpg|jpeg|png|gif)$/,
-        })
-        .addMaxSizeValidator({
-          maxSize: 5_000_000,
-        })
-        .build({
-          errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
-          fileIsRequired: true,
-        }),
-    )
-    banner_image: Express.Multer.File,
-  ) {
-    const event = await this.eventService.createEvent({
+  @UseGuards(JwtGuard)
+  async createEvent(@Body() data: EventCreationDto) {
+    const event = await this.eventService.createEvent(data);
+    return event;
+  }
+
+  @ApiBody({ type: EventUpdateDto })
+  @ApiResponse({
+    status: 200,
+    description: 'The event has been successfully updated.',
+    type: EventResponseDto,
+  })
+  @Put(':id')
+  @UseGuards(JwtGuard)
+  async updateEvent(@Param('id') id: string, @Body() data: EventUpdateDto) {
+    const event = await this.eventService.updateEventById(id, {
       ...data,
-      banner_image,
     });
     return event;
   }
 
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        name: { type: 'string' },
-        tagline: { type: 'string' },
-        banner_image: { type: 'file', format: 'binary' },
-        start_date: { type: 'string', format: 'date-time' },
-        end_date: { type: 'string', format: 'date-time' },
-      },
-    },
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiResponse({
+    status: HttpStatus.NO_CONTENT,
+    description: 'The event has been successfully deleted.',
   })
-  @ApiConsumes('multipart/form-data')
-  @Patch(':id')
-  @UseGuards(AuthenticatedGuard)
-  @UseInterceptors(FileInterceptor('banner_image'))
-  async updateEvent(
-    @Param('id') id: string,
-    @Body() data: EventUpdateDto,
-    @UploadedFile(
-      new ParseFilePipeBuilder()
-        .addFileTypeValidator({
-          fileType: /(jpg|jpeg|png|gif)$/,
-        })
-        .addMaxSizeValidator({
-          maxSize: 5_000_000,
-        })
-        .build({
-          errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
-          fileIsRequired: false,
-        }),
-    )
-    banner_image: Express.Multer.File,
-  ) {
-    const event = await this.eventService.updateEventById(id, {
-      ...data,
-      banner_image,
-    });
-    return event;
+  @Delete(':id')
+  @UseGuards(JwtGuard)
+  deleteStoreById(@Param('id') eventId: string) {
+    return this.eventService.deleteEventById(eventId);
   }
 }
