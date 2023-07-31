@@ -60,7 +60,7 @@ export class AuthController {
   }
 
   @Get('/user')
-  @UseGuards(AuthenticatedGuard)
+  @UseGuards(JwtGuard)
   async guetUser(@Req() req: any): Promise<any> {
     const { name, id, email, display_picture } =
       await this.authService.getLoggedInUser(req.user.id);

@@ -7,6 +7,7 @@ import {
   Param,
   Patch,
   Post,
+  Put,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -15,6 +16,7 @@ import { AttendanceCreationDto, AttendanceUpdateDto } from './attendance.types';
 import { ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { AuthenticatedGuard } from 'src/auth/authenticated.guard';
 import { IsOwnerGuard } from 'src/guards/is-owner.guard';
+import { JwtGuard } from 'src/auth/guard';
 
 @ApiTags('Attendance')
 @Controller('attendance')
@@ -22,7 +24,7 @@ export class AttendanceController {
   constructor(private readonly attendanceService: AttendanceService) {}
 
   @Get('/event/:eventId')
-  @UseGuards(AuthenticatedGuard)
+  @UseGuards(JwtGuard)
   async getAttendanceByEvent(@Param('eventId') eventId: string) {
     const attendance = await this.attendanceService.getAttendanceByEventId(
       eventId,
@@ -31,7 +33,7 @@ export class AttendanceController {
   }
 
   @Get('/user/:userId')
-  @UseGuards(AuthenticatedGuard)
+  @UseGuards(JwtGuard)
   async getAttendanceByUser(@Param('userId') userId: string) {
     const attendance = await this.attendanceService.getAttendanceByUserId(
       userId,
@@ -40,7 +42,7 @@ export class AttendanceController {
   }
 
   @Get(':eventId/:userId')
-  @UseGuards(AuthenticatedGuard, IsOwnerGuard)
+  @UseGuards(JwtGuard, IsOwnerGuard)
   async getUserEventAttendance(
     @Param() params: { eventId: string; userId: string },
   ) {
@@ -48,60 +50,16 @@ export class AttendanceController {
     return await this.attendanceService.getUserEventAttendance(eventId, userId);
   }
 
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        user_id: { type: 'string' },
-        event_id: { type: 'string' },
-        in_person: { type: 'boolean' },
-        services_required: {
-          type: 'array',
-          items: {
-            type: 'number',
-            format: 'int32',
-          },
-        },
-        dates_attending: {
-          type: 'array',
-          items: {
-            type: 'string',
-            format: 'date-time',
-          },
-        },
-        existing_dependents: {
-          type: 'array',
-          items: {
-            type: 'object',
-            properties: {
-              dependent_id: { type: 'string' },
-            },
-          },
-        },
-        new_dependents: {
-          type: 'array',
-          items: {
-            type: 'object',
-            properties: {
-              first_name: { type: 'string' },
-              last_name: { type: 'string' },
-              birthday: { type: 'string', format: 'date-time' },
-              allergies: { type: 'string' },
-              emergency_contact: { type: 'string' },
-            },
-          },
-        },
-      },
-    },
-  })
+  @ApiBody({ type: AttendanceCreationDto })
   @ApiConsumes('application/json')
   @Post()
-  @UseGuards(AuthenticatedGuard)
+  @UseGuards(JwtGuard)
   async createAttendance(@Body() data: AttendanceCreationDto) {
     const attendance = await this.attendanceService.createAttendance(data);
     return attendance;
   }
 
+  // @ApiBody({ type: AttendanceUpdateDto })
   @ApiBody({
     schema: {
       type: 'object',
@@ -156,8 +114,8 @@ export class AttendanceController {
     },
   })
   @ApiConsumes('application/json')
-  @Patch(':id')
-  @UseGuards(AuthenticatedGuard)
+  @Put(':id')
+  @UseGuards(JwtGuard)
   async updateAttendance(
     @Param('id') id: number,
     @Body() data: AttendanceUpdateDto,
