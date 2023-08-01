@@ -2,7 +2,7 @@ import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { WalkInService } from './walk-in.service';
 import { CreateWalkInFormDto } from './walk-in.types';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
-import { AuthenticatedGuard } from 'src/auth/authenticated.guard';
+import { JwtGuard } from '../auth/guard';
 
 @ApiTags('Walk In')
 @Controller('walk-in')
@@ -10,7 +10,7 @@ export class WalkInController {
   constructor(private readonly walkInService: WalkInService) {}
 
   @Get(':eventId')
-  @UseGuards(AuthenticatedGuard)
+  @UseGuards(JwtGuard)
   async getEventWalkIns(@Param('eventId') eventId: string): Promise<any> {
     return await this.walkInService.getEventWalkIns(eventId);
   }
@@ -30,7 +30,7 @@ export class WalkInController {
     },
   })
   @Post(':eventId')
-  @UseGuards(AuthenticatedGuard)
+  @UseGuards(JwtGuard)
   async createWalkIn(
     @Param('eventId') eventId: string,
     @Body() input: CreateWalkInFormDto,

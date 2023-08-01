@@ -1,16 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/prisma-module/prisma.service';
+import { PrismaService } from '../prisma-module/prisma.service';
 import { EventCreationDto, EventUpdateDto } from './event.types';
-import { AmazonS3Service } from 'src/amazon-s3/amazon-s3.service';
-import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class EventService {
-  constructor(
-    private readonly prismaService: PrismaService,
-    private readonly s3Service: AmazonS3Service,
-    private readonly configService: ConfigService,
-  ) {}
+  constructor(private readonly prismaService: PrismaService) {}
 
   async createEvent(data: EventCreationDto): Promise<any> {
     const event = await this.prismaService.event.create({
