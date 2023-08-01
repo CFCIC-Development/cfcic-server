@@ -14,9 +14,9 @@ import {
 import { AttendanceService } from './attendance.service';
 import { AttendanceCreationDto, AttendanceUpdateDto } from './attendance.types';
 import { ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
-import { AuthenticatedGuard } from 'src/auth/authenticated.guard';
-import { IsOwnerGuard } from 'src/guards/is-owner.guard';
-import { JwtGuard } from 'src/auth/guard';
+import { AuthenticatedGuard } from '../auth/authenticated.guard';
+import { IsOwnerGuard } from '../guards/is-owner.guard';
+import { JwtGuard } from '../auth/guard';
 
 @ApiTags('Attendance')
 @Controller('attendance')

@@ -17,7 +17,7 @@ import {
   EventUpdateDto,
 } from './event.types';
 import { ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { JwtGuard } from 'src/auth/guard';
+import { JwtGuard } from '../auth/guard';
 
 @ApiTags('Event')
 @Controller('event')
