@@ -2,7 +2,10 @@ import { PrismaService } from '../prisma-module/prisma.service';
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { AuthDto } from './dto';
 import * as argon from 'argon2';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
+import {
+  GetResult,
+  PrismaClientKnownRequestError,
+} from '@prisma/client/runtime';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 
@@ -12,7 +15,7 @@ export class AuthService {
     private readonly prismaService: PrismaService,
     private jwt: JwtService,
     private config: ConfigService,
-  ) {}
+  ) { }
 
   async getLoggedInUser(id: string) {
     return await this.prismaService.user.findUnique({ where: { id } });
@@ -61,7 +64,22 @@ export class AuthService {
   async signToken(
     userId: string,
     email: string,
-  ): Promise<{ access_token: string }> {
+  ): Promise<{
+    access_token: string;
+    user: GetResult<
+      {
+        id: string;
+        email: string;
+        password: string;
+        name: string;
+        display_picture: string;
+        provider: string;
+        createdAt: Date;
+        updatedAt: Date;
+      },
+      { [x: string]: () => unknown }
+    >;
+  }> {
     const payload = {
       sub: userId,
       email,
@@ -73,8 +91,16 @@ export class AuthService {
       secret: secret,
     });
 
+    const userData = await this.prismaService.user.findUnique({
+      where: { id: userId },
+    });
+
+    // Delete the 'password' key from the 'userData' object
+    delete userData.password;
+
     return {
       access_token: token,
+      user: userData,
     };
   }
 }
