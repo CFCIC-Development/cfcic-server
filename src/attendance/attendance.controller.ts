@@ -2,19 +2,26 @@ import {
   Body,
   Controller,
   Get,
-  HttpException,
   HttpStatus,
   Param,
-  Patch,
   Post,
   Put,
-  Req,
   UseGuards,
 } from '@nestjs/common';
 import { AttendanceService } from './attendance.service';
-import { AttendanceCreationDto, AttendanceUpdateDto } from './attendance.types';
-import { ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
-import { AuthenticatedGuard } from '../auth/authenticated.guard';
+import {
+  AttendanceCreationDto,
+  AttendanceUpdateDto,
+  RegistrationDto,
+} from './attendance.types';
+import {
+  ApiBody,
+  ApiConsumes,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { IsOwnerGuard } from '../guards/is-owner.guard';
 import { JwtGuard } from '../auth/guard';
 
@@ -32,6 +39,20 @@ export class AttendanceController {
     return attendance;
   }
 
+  @ApiOperation({
+    description:
+      'Endpoint to get all registration details of a user for a all events',
+  })
+  @ApiParam({
+    name: 'userId',
+    description: 'User ID for which registration details are needed',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description:
+      'All Registration data for user across all events. Returns an array of objects',
+    type: [RegistrationDto],
+  })
   @Get('/user/:userId')
   @UseGuards(JwtGuard)
   async getAttendanceByUser(@Param('userId') userId: string) {
@@ -41,6 +62,23 @@ export class AttendanceController {
     return attendance;
   }
 
+  @ApiOperation({
+    description:
+      'Endpoint to get registration details of a user for a specific event',
+  })
+  @ApiParam({
+    name: 'eventId',
+    description: 'Event ID for which registration details are needed',
+  })
+  @ApiParam({
+    name: 'userId',
+    description: 'User ID for which registration details are needed',
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Registration data for user for given event',
+    type: RegistrationDto,
+  })
   @Get(':eventId/:userId')
   @UseGuards(JwtGuard, IsOwnerGuard)
   async getUserEventAttendance(

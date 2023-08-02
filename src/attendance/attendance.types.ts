@@ -135,3 +135,85 @@ export class AttendanceUpdatingDto {
   @ApiProperty()
   dates_attending?: Date[];
 }
+
+class DependentDto {
+  @ApiProperty()
+  id: string;
+
+  @ApiProperty()
+  first_name: string;
+
+  @ApiProperty()
+  last_name: string;
+
+  @ApiProperty()
+  birthday: Date;
+
+  @ApiProperty()
+  allergies: string;
+
+  @ApiProperty()
+  emergency_contact: string;
+
+  @ApiProperty()
+  parent_profile_id: string | null;
+
+  @ApiProperty()
+  createdAt: Date;
+
+  @ApiProperty()
+  updatedAt: Date;
+}
+
+class EventServiceDto {
+  @ApiProperty()
+  name: string;
+}
+
+class ServiceRequiredDto {
+  @ApiProperty()
+  event_service: EventServiceDto;
+}
+
+export class RegistrationDto {
+  @ApiProperty()
+  id: number;
+
+  @ApiProperty()
+  event_id: string;
+
+  @ApiProperty()
+  user_id: string;
+
+  @ApiProperty()
+  in_person: boolean;
+
+  @ApiProperty()
+  requires_feeding: boolean;
+
+  @ApiProperty()
+  requires_accomodation: boolean;
+
+  @ApiProperty()
+  requires_transport: boolean;
+
+  @ApiProperty({ type: [Date] })
+  dates_attending: Date[];
+
+  @ApiProperty()
+  checked_in: boolean;
+
+  @ApiProperty()
+  createdAt: Date;
+
+  @ApiProperty()
+  updatedAt: Date;
+
+  @ApiProperty({ type: [ServiceRequiredDto] })
+  services_required: ServiceRequiredDto[];
+
+  @ApiProperty({ type: [DependentDto] })
+  children: DependentDto[];
+}
+
+export class ListRegistrationDto extends Array<RegistrationDto> {}
