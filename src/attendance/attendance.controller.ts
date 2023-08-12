@@ -6,6 +6,7 @@ import {
   Param,
   Post,
   Put,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { AttendanceService } from './attendance.service';
@@ -92,7 +93,12 @@ export class AttendanceController {
   @ApiConsumes('application/json')
   @Post()
   @UseGuards(JwtGuard)
-  async createAttendance(@Body() data: AttendanceCreationDto) {
+  async createAttendance(@Body() data: AttendanceCreationDto, @Req() req) {
+    const loggedInUser = req.user;
+    data = {
+      ...data,
+      user: loggedInUser,
+    };
     const attendance = await this.attendanceService.createAttendance(data);
     return attendance;
   }
