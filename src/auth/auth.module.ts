@@ -10,13 +10,20 @@ import { ConfigModule } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { JwtStrategy } from './strategy';
 import { JwtModule } from '@nestjs/jwt';
+import { EmailService } from 'src/email/email.service';
+import { EmailModule } from 'src/email/email.module';
+import { BullModule } from '@nestjs/bull';
 
 @Module({
   imports: [
     PassportModule.register({ session: true }),
     PrismaModule,
     ConfigModule,
+    EmailModule,
     JwtModule.register({}),
+    BullModule.registerQueue({
+      name: 'email', // The name of the queue
+    }),
   ],
   providers: [
     FacebookStrategy,
@@ -25,6 +32,7 @@ import { JwtModule } from '@nestjs/jwt';
     AuthenticatedGuard,
     AuthService,
     JwtStrategy,
+    EmailService,
   ],
   controllers: [AuthController],
   exports: [FacebookStrategy, GoogleStrategy, AuthenticatedGuard],

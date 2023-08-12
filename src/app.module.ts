@@ -17,6 +17,9 @@ import { AmazonS3Module } from './amazon-s3/amazon-s3.module';
 import { EventModule } from './event/event.module';
 import { AttendanceModule } from './attendance/attendance.module';
 import { WalkInModule } from './walk-in/walk-in.module';
+import { EmailModule } from './email/email.module';
+import { EmailService } from './email/email.service';
+import { BullModule } from '@nestjs/bull';
 
 @Module({
   imports: [
@@ -35,8 +38,12 @@ import { WalkInModule } from './walk-in/walk-in.module';
     EventModule,
     AttendanceModule,
     WalkInModule,
+    EmailModule,
+    BullModule.registerQueue({
+      name: 'email', // The name of the queue
+    }),
   ],
   controllers: [AppController],
-  providers: [AppService, PrismaService],
+  providers: [AppService, PrismaService, EmailService],
 })
 export class AppModule {}
