@@ -3,6 +3,7 @@ import {
   IsBoolean,
   IsNotEmpty,
   IsNumber,
+  IsObject,
   IsOptional,
   IsString,
   IsUUID,
@@ -53,6 +54,11 @@ export class AttendanceCreationDto {
   @IsArray()
   @ApiProperty()
   services_required: number[];
+
+  @IsOptional()
+  @IsObject()
+  @ApiProperty()
+  user: Record<string, never>;
 
   @IsOptional()
   @IsArray()

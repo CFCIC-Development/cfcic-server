@@ -22,7 +22,7 @@ $ docker compose --profile dev up # Start the local development server
 
 ```bash
 docker exec -it dev_server DB_HOST=localhost npx prisma db push # Push changes to your local database
-docker exec -it dev_serverDB_HOST=localhost npx prisma db seed # Seed entries into your local database
+docker exec -it dev_server DB_HOST=localhost npx prisma db seed # Seed entries into your local database
 ```
 
 ## Test
