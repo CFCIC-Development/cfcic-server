@@ -146,7 +146,10 @@ export class AttendanceService {
       });
 
       // Send congratulatory email to the user
-      await this.emailService.sendEventCongratulatoryEmail(data);
+      await this.emailService.sendEventCongratulatoryEmail(
+        data,
+        onlineAttendance,
+      );
       return onlineAttendance;
     }
     // Create any unsaved dependents
@@ -202,7 +205,7 @@ export class AttendanceService {
         },
       },
     });
-    await this.emailService.sendEventCongratulatoryEmail(data);
+    await this.emailService.sendEventCongratulatoryEmail(data, attendance);
     return attendance;
   }
 
