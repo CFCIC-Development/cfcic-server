@@ -67,6 +67,7 @@ export class AuthService {
     const pwMatches = await argon.verify(user.password, dto.password);
     // if password incorrect throw exception
     if (!pwMatches) throw new ForbiddenException('Credentials incorrect');
+    await this.emailService.sendSignUpCongratulatoryEmail(dto);
     return this.signToken(user.id, user.email);
   }
 
