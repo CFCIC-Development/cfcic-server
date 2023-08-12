@@ -8,10 +8,14 @@ import {
   AttendanceUpdatingDto,
 } from './attendance.types';
 import { DependentCreationFromParentObject } from 'src/dependent/dependent.types';
+import { EmailService } from 'src/email/email.service';
 
 @Injectable()
 export class AttendanceService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private emailService: EmailService,
+  ) {}
 
   async getAttendanceByEventId(eventId: string): Promise<any> {
     const attendance = await this.prismaService.attendance.findMany({
@@ -142,7 +146,7 @@ export class AttendanceService {
       });
 
       // Send congratulatory email to the user
-      await this.sendCongratulatoryEmail(data);
+      await this.emailService.sendEventCongratulatoryEmail(data);
       return onlineAttendance;
     }
     // Create any unsaved dependents
@@ -198,7 +202,7 @@ export class AttendanceService {
         },
       },
     });
-    await this.sendCongratulatoryEmail(data);
+    await this.emailService.sendEventCongratulatoryEmail(data);
     return attendance;
   }
 

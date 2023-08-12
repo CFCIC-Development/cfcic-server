@@ -14,6 +14,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
+import { EmailService } from '../email/email.service';
 
 @Injectable()
 export class AuthService {
@@ -21,6 +22,7 @@ export class AuthService {
     private readonly prismaService: PrismaService,
     private jwt: JwtService,
     private config: ConfigService,
+    private emailService: EmailService,
   ) {}
 
   async getLoggedInUser(id: string) {
@@ -39,7 +41,7 @@ export class AuthService {
           password: hash,
         },
       });
-      await this.sendCongratulatoryEmail(dto);
+      await this.emailService.sendSignUpCongratulatoryEmail(dto);
       return this.signToken(user.id, user.email);
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
