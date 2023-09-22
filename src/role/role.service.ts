@@ -6,6 +6,16 @@ import { RolesCreationDto } from './role.types';
 export class RoleService {
   constructor(private readonly prismaService: PrismaService) {}
 
+  async getAllUsers() {
+    return await this.prismaService.user.findMany();
+  }
+
+  async getUserById({ id }: { id: string }) {
+    return await this.prismaService.user.findUnique({
+      where: { id: id },
+    });
+  }
+
   async getAllRoles() {
     return await this.prismaService.rolesAndResponsibilities.findMany();
   }
